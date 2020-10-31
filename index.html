@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<!-- Primary Meta Tags -->
+	<title>2D Agency Porathissery</title>
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.1/normalize.min.css">
+	<link rel="stylesheet" type="text/css" href="css/bootstrap.min.css">
+	<link rel="stylesheet" type="text/css" href="css/styles.css">
+
+</head>
+<body>
+
+
+	<div class="form-main" id="products">
+	  <img class="logo-main mb-4" src="logo.png" alt="" width="80" height="80">
+	  <h1 class="h3 mb-4 font-weight-normal text-center">2D Agency</h1>
+	  <label for="inputEmail" class="sr-only">Email address</label>
+	  <input id="search_field" class="form-control form-control-lg" placeholder="Search by ID or product name..." autofocus="">	  
+	  <!-- <button class="btn btn-lg btn-primary btn-block mt-4" type="submit">Search</button> -->
+
+	  <ul class="list mt-4">
+	  </ul>
+	</div>
+
+	<script src="https://code.jquery.com/jquery-3.5.0.min.js" integrity="sha256-xNzN2a4ltkB44Mc/Jz3pT4iU1cmeR0FkXs4pru/JxaQ=" crossorigin="anonymous"></script>
+	<!-- <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/vue/dist/vue.min.js"></script> -->
+  	<script type="text/javascript" src="js/bootstrap.min.js"></script>
+  	<script type="text/javascript" src="js/airtable.browser.js"></script>
+  	<script src="https://cdnjs.cloudflare.com/ajax/libs/list.js/1.5.0/list.min.js"></script>
+	<script type="text/javascript">
+
+		var AIRTABLE_API_KEY = "keyaY233WFzFahQdD";
+		var AIRTABLE_BASE_ID = "app60AwINoqy6RXei";
+		var Airtable = require('airtable');
+		var base = new Airtable({apiKey: AIRTABLE_API_KEY}).base(AIRTABLE_BASE_ID);
+		var products = [];
+		var productList;
+		var options = {
+		  valueNames: [ 'id', 'name', 'quantity', 'original_price', 'sale_price' ],
+		  item: `<li class="card mb-4">
+			<div class="card-body">
+				<div class="row">
+					<div class="col-9">
+						<h3 class="id badge badge-primary"></h3>
+					    <h5 class="name"></h5>
+					    <h6 class="quantity card-subtitle mb-2 text-muted"></h6>
+					</div>
+					<div class="col-3">
+					    <h6 class="sale_price text-right"></h6>
+					</div>
+				</div>
+				<p class="card-text original_price"></p>
+			</div>
+	  	</li>`
+		};
+
+		$(document).ready(()=>{
+			var id = 0;
+			base('Products').select({
+				    maxRecords: 100,
+				    view: "Grid view"
+				}).eachPage(function page(records, fetchNextPage) {
+					console.log(records, 90909090);
+				    records.forEach((record)=>{
+				    	if(record.fields['Product Name'] && record.fields['Product Name'].length>0){
+				    		id++;
+				    		var name = record.fields['Product Name'];
+					    	var quantity = record.fields['Quantity'];
+					    	var original_price = record.fields['Original Price'];
+					    	var sale_price = record.fields['Sale Price'];
+					    	var product = {
+					    		'id': id, 
+					    		'name': name,
+					    		'quantity': quantity + ' in stock',
+					    		'original_price': 'Purchase price: ₹' + original_price,
+					    		'sale_price': '₹' + sale_price,
+					    	}
+					    	console.log(product);
+					    	self.products.push(product);					    	
+				    	}
+				    });
+				    fetchNextPage();
+
+				}, (err) => {
+			    	console.log(products)	
+			    	productList = new List('products', options, products);	
+				    // if (err) { console.error(err); return; }
+				});
+		});
+
+		$('#search_field').on('keyup', function() {
+		  var searchString = $(this).val();
+		  productList.search(searchString, ['name', 'id']);
+		});
+	</script>
+</body>
+</html>
