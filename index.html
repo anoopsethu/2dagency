@@ -20,7 +20,14 @@
 	  <!-- <button class="btn btn-lg btn-primary btn-block mt-4" type="submit">Search</button> -->
 
 	  <ul class="list mt-4">
+	  
+	  	<div id="loader" class="text-center">
+	  		<p class="text-muted card-subtitle mt-5">Loading, please wait</p>
+	  		<div class="lds-ellipsis"><div></div><div></div><div></div><div></div></div>
+	  	</div>
 	  </ul>
+
+
 	</div>
 
 	<script src="https://code.jquery.com/jquery-3.5.0.min.js" integrity="sha256-xNzN2a4ltkB44Mc/Jz3pT4iU1cmeR0FkXs4pru/JxaQ=" crossorigin="anonymous"></script>
@@ -58,10 +65,10 @@
 		$(document).ready(()=>{
 			var id = 0;
 			base('Products').select({
-				    maxRecords: 100,
+				    maxRecords: 500,
 				    view: "Grid view"
 				}).eachPage(function page(records, fetchNextPage) {
-					console.log(records, 90909090);
+					// console.log(records, 90909090);
 				    records.forEach((record)=>{
 				    	if(record.fields['Product Name'] && record.fields['Product Name'].length>0){
 				    		id++;
@@ -76,22 +83,23 @@
 					    		'original_price': 'Purchase price: ₹' + original_price,
 					    		'sale_price': '₹' + sale_price,
 					    	}
-					    	console.log(product);
-					    	self.products.push(product);					    	
+					    	// console.log(product);
+					    	self.products.push(product);	
 				    	}
 				    });
 				    fetchNextPage();
 
 				}, (err) => {
-			    	console.log(products)	
-			    	productList = new List('products', options, products);	
+			    	$("#loader").fadeOut(()=>{
+				    	productList = new List('products', options, products);	
+			    	});
+			    	$('#search_field').on('keyup', function() {
+					  var searchString = $(this).val();
+					  productList.search(searchString, ['name', 'id']);
+					});
+			    	// console.log(products)	
 				    // if (err) { console.error(err); return; }
 				});
-		});
-
-		$('#search_field').on('keyup', function() {
-		  var searchString = $(this).val();
-		  productList.search(searchString, ['name', 'id']);
 		});
 	</script>
 </body>
